@@ -1,7 +1,6 @@
 <UserControl x:Class="Cling.Views.DeviceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:cling="clr-namespace:Cling.Controls" >
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <StackPanel Margin="14,8">
 
         <!-- Section header + Intel chip placeholder -->
@@ -59,7 +58,7 @@
                 <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="0" Text="Units" Style="{StaticResource ClingLabel}"/>
+            <TextBlock Grid.Row="0" Text="{Binding ComputeUnitsLabel}" Style="{StaticResource ClingLabel}"/>
             <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="{Binding ComputeUnits}"/>
 
             <TextBlock Grid.Row="1" Text="Clock" Style="{StaticResource ClingLabel}"/>

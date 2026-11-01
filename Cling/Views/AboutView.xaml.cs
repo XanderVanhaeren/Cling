@@ -12,9 +12,5 @@ namespace Cling.Views
             InitializeComponent();
         }
 
-        private void Gauge_Loaded(object sender, System.Windows.RoutedEventArgs e)
-        {
-
-        }
     }
 }

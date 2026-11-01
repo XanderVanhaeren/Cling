@@ -5,13 +5,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Cling"
         xmlns:v="clr-namespace:Cling.Views"
-        xmlns:cling="clr-namespace:Cling.Controls"
         mc:Ignorable="d"
         Style="{StaticResource ClingWindow}"
-        Title="CL!ng" Height="580" Width="580" ResizeMode="NoResize" Loaded="MainWindow_Loaded">
+        Title="CL!ng" Height="600" Width="600" ResizeMode="NoResize" Loaded="MainWindow_Loaded">
     <Grid Margin="0,0,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
         <!-- Tabs -->
-        <TabControl Style="{StaticResource ClingTabControl}">
+        <TabControl Grid.Row="0" Style="{StaticResource ClingTabControl}">
             <TabItem Header="Device" Style="{StaticResource ClingTabItemHeader}">
                 <v:DeviceView x:Name="DeviceInfoView"/>
             </TabItem>
@@ -22,9 +26,19 @@
                 <v:PerformanceView/>
             </TabItem>
             <TabItem Header="About" Style="{StaticResource ClingTabItemHeader}">
-                <v:AboutView/>
+                <v:AboutView Loaded="AboutView_Loaded"/>
             </TabItem>
         </TabControl>
 
+        <Border Background="#f2f2f2" BorderBrush="#dcdcdc" BorderThickness="1,1,1,0" Padding="12,6" Margin="0,520,0,0" Grid.RowSpan="2">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="OpenCL Device" Style="{StaticResource ClingLabel}" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <ComboBox x:Name="DeviceSelector" Grid.Column="1" Style="{StaticResource ClingComboBox}" DisplayMemberPath="DisplayName" SelectionChanged="DeviceSelector_SelectionChanged"/>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

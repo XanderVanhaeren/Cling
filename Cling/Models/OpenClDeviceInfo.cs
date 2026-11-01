@@ -2,12 +2,14 @@ namespace Cling.Models;
 
 public sealed class OpenClDeviceInfo
 {
+    public string DisplayName { get; init; } = "OpenCL unavailable";
     public string StatusMessage { get; init; } = string.Empty;
     public string Name { get; init; } = "Unavailable";
     public string Platform { get; init; } = "Unavailable";
     public string Version { get; init; } = "Unavailable";
     public string Vendor { get; init; } = "Unavailable";
     public string Type { get; init; } = "Unavailable";
+    public string ComputeUnitsLabel { get; init; } = "Compute units";
     public string ComputeUnits { get; init; } = "Unavailable";
     public string Clock { get; init; } = "Unavailable";
     public string AddressSpace { get; init; } = "Unavailable";

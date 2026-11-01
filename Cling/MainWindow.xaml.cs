@@ -1,4 +1,6 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
+using Cling.Models;
 using Cling.Services;
 
 namespace Cling
@@ -15,9 +17,30 @@ namespace Cling
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            var deviceInfo = await Task.Run(() => new OpenClDeviceService().GetDefaultDeviceInfo());
-            DeviceInfoView.DataContext = deviceInfo;
-            MemoryInfoView.DataContext = deviceInfo;
+            var devices = await Task.Run(() => new OpenClDeviceService().GetAvailableDevices());
+            DeviceSelector.ItemsSource = devices;
+            DeviceSelector.IsEnabled = devices.Count > 1;
+            DeviceSelector.SelectedIndex = 0;
+            UpdateSelectedDevice();
+        }
+
+        private void DeviceSelector_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateSelectedDevice();
+        }
+
+        private void UpdateSelectedDevice()
+        {
+            if (DeviceSelector.SelectedItem is OpenClDeviceInfo deviceInfo)
+            {
+                DeviceInfoView.DataContext = deviceInfo;
+                MemoryInfoView.DataContext = deviceInfo;
+            }
+        }
+
+        private void AboutView_Loaded(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

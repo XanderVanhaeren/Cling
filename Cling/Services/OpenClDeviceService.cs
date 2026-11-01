@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Text;
 using Cling.Models;
+using Microsoft.Win32;
 
 namespace Cling.Services;
 
@@ -10,11 +11,10 @@ public sealed class OpenClDeviceService
     private const int DeviceNotFound = -1;
     private const int PlatformNotFound = -1001;
     private const ulong AllDeviceTypes = 0xFFFFFFFF;
+    private const ulong DeviceTypeCpu = 1UL << 1;
     private const ulong DeviceTypeGpu = 1UL << 2;
 
     private const uint PlatformName = 0x0902;
-    private const uint PlatformVendor = 0x0903;
-    private const uint PlatformVersion = 0x0901;
 
     private const uint DeviceType = 0x1000;
     private const uint DeviceMaxComputeUnits = 0x1002;
@@ -51,37 +51,42 @@ public sealed class OpenClDeviceService
     private const uint DevicePreferredVectorWidthHalf = 0x1034;
     private const ulong FloatingPointFma = 1UL << 4;
 
-    public OpenClDeviceInfo GetDefaultDeviceInfo()
+    public IReadOnlyList<OpenClDeviceInfo> GetAvailableDevices()
     {
         try
         {
-            var devices = EnumerateDevices();
-            if (devices.Count == 0)
+            var devices = EnumerateDevices()
+                .Where(device => device.IsCpu || device.IsGpu)
+                .OrderByDescending(device => device.IsGpu)
+                .Select(device => device.Info)
+                .ToList();
+
+            if (!devices.Any(device => device.Type == "CPU"))
             {
-                return OpenClDeviceInfo.Unavailable("No OpenCL device was found. Install a vendor OpenCL driver/runtime.");
+                devices.Add(CreateHostCpuInfo());
             }
 
-            return devices.FirstOrDefault(device => device.IsGpu).Info ?? devices[0].Info;
+            return devices;
         }
         catch (DllNotFoundException)
         {
-            return OpenClDeviceInfo.Unavailable("OpenCL runtime (OpenCL.dll) was not found.");
+            return [CreateHostCpuInfo()];
         }
         catch (EntryPointNotFoundException)
         {
-            return OpenClDeviceInfo.Unavailable("The installed OpenCL runtime is missing required functions.");
+            return [CreateHostCpuInfo()];
         }
         catch (BadImageFormatException)
         {
-            return OpenClDeviceInfo.Unavailable("The installed OpenCL runtime does not match the application architecture.");
+            return [CreateHostCpuInfo()];
         }
         catch (OpenClException exception)
         {
-            return OpenClDeviceInfo.Unavailable($"OpenCL query failed ({exception.ErrorCode}).");
+            return [CreateHostCpuInfo($"OpenCL query failed ({exception.ErrorCode}); showing host CPU information.")];
         }
     }
 
-    private static List<(bool IsGpu, OpenClDeviceInfo Info)> EnumerateDevices()
+    private static List<(bool IsGpu, bool IsCpu, OpenClDeviceInfo Info)> EnumerateDevices()
     {
         var platformStatus = clGetPlatformIDs(0, null, out uint platformCount);
         if (platformStatus == PlatformNotFound)
@@ -96,14 +101,11 @@ public sealed class OpenClDeviceService
 
         var platforms = new IntPtr[checked((int)platformCount)];
         Check(clGetPlatformIDs(platformCount, platforms, out _));
-        var devices = new List<(bool IsGpu, OpenClDeviceInfo Info)>();
+        var devices = new List<(bool IsGpu, bool IsCpu, OpenClDeviceInfo Info)>();
 
         foreach (var platform in platforms)
         {
             var platformName = GetPlatformString(platform, PlatformName);
-            var platformVendor = GetPlatformString(platform, PlatformVendor);
-            var platformVersion = GetPlatformString(platform, PlatformVersion);
-            var platformDescription = string.Join(" — ", new[] { platformName, platformVendor, platformVersion }.Where(value => !string.IsNullOrWhiteSpace(value)));
 
             var status = clGetDeviceIDs(platform, AllDeviceTypes, 0, null, out uint deviceCount);
             if (status == DeviceNotFound)
@@ -124,7 +126,7 @@ public sealed class OpenClDeviceService
                 try
                 {
                     var type = GetValue<ulong>(device, DeviceType);
-                    devices.Add(((type & DeviceTypeGpu) != 0, ReadDeviceInfo(platformDescription, device, type)));
+                    devices.Add(((type & DeviceTypeGpu) != 0, (type & DeviceTypeCpu) != 0, ReadDeviceInfo(platformName, device, type)));
                 }
                 catch (OpenClException)
                 {
@@ -137,6 +139,9 @@ public sealed class OpenClDeviceService
 
     private static OpenClDeviceInfo ReadDeviceInfo(string platform, IntPtr device, ulong type)
     {
+        var name = GetString(device, DeviceName);
+        var vendor = GetString(device, DeviceVendor);
+        var deviceType = GetDeviceTypeName(type);
         var workItemDimensions = GetValue<uint>(device, DeviceMaxWorkItemDimensions);
         var workItemSizes = GetArray<nuint>(device, DeviceMaxWorkItemSizes, checked((int)workItemDimensions));
         var singleFpConfig = GetOptionalValue<ulong>(device, DeviceSingleFpConfig);
@@ -146,11 +151,12 @@ public sealed class OpenClDeviceService
 
         return new OpenClDeviceInfo
         {
-            Name = GetString(device, DeviceName),
+            DisplayName = $"{deviceType} — {vendor} {name} ({platform})",
+            Name = name,
             Platform = platform,
             Version = string.IsNullOrWhiteSpace(version) ? openClCVersion : version,
-            Vendor = GetString(device, DeviceVendor),
-            Type = GetDeviceTypeName(type),
+            Vendor = vendor,
+            Type = deviceType,
             ComputeUnits = GetValue<uint>(device, DeviceMaxComputeUnits).ToString(),
             Clock = $"{GetValue<uint>(device, DeviceMaxClockFrequency)} MHz",
             AddressSpace = $"{GetValue<uint>(device, DeviceAddressBits)} bit",
@@ -158,7 +164,7 @@ public sealed class OpenClDeviceService
             WorkItemSizes = string.Join(" × ", workItemSizes),
             SinglePrecisionFma = FormatSupport(singleFpConfig, FloatingPointFma),
             DoublePrecisionSupport = FormatSupport(doubleFpConfig, 0),
-            GlobalMemory = FormatBytes(GetValue<ulong>(device, DeviceGlobalMemorySize), 1024d * 1024d, "MiB"),
+            GlobalMemory = FormatBytes(GetGlobalMemoryBytes(device, type), 1_000_000d, "MB"),
             LocalMemory = FormatBytes(GetValue<ulong>(device, DeviceLocalMemorySize), 1024d, "KiB"),
             LocalMemoryType = FormatLocalMemoryType(GetValue<uint>(device, DeviceLocalMemoryType)),
             UnifiedMemoryWithHost = FormatBoolean(GetOptionalValue<uint>(device, DeviceHostUnifiedMemory)),
@@ -272,6 +278,81 @@ public sealed class OpenClDeviceService
         return $"{bytes / divisor:N0} {unit}";
     }
 
+    private static ulong GetGlobalMemoryBytes(IntPtr device, ulong type)
+    {
+        if ((type & DeviceTypeCpu) != 0 && TryGetSystemPhysicalMemoryBytes() is ulong systemMemory)
+            return systemMemory;
+
+        return GetValue<ulong>(device, DeviceGlobalMemorySize);
+    }
+
+    private static OpenClDeviceInfo CreateHostCpuInfo(string? statusMessage = null)
+    {
+        using var processorKey = Registry.LocalMachine.OpenSubKey(@"HARDWARE\DESCRIPTION\System\CentralProcessor\0");
+        var name = processorKey?.GetValue("ProcessorNameString") as string ?? Environment.GetEnvironmentVariable("PROCESSOR_IDENTIFIER") ?? "Host CPU";
+        var vendorIdentifier = processorKey?.GetValue("VendorIdentifier") as string ?? string.Empty;
+        var vendor = vendorIdentifier switch
+        {
+            "AuthenticAMD" => "AMD",
+            "GenuineIntel" => "Intel",
+            "ARM" => "Arm",
+            _ => vendorIdentifier
+        };
+        var clockMhz = processorKey?.GetValue("~MHz") is int frequency && frequency > 0
+            ? $"~{frequency} MHz (OS-reported)"
+            : "Unavailable";
+        var totalMemory = TryGetSystemPhysicalMemoryBytes();
+
+        return new OpenClDeviceInfo
+        {
+            DisplayName = $"CPU — {vendor} {name} (Windows host)",
+            StatusMessage = statusMessage ?? "Host CPU information; OpenCL-specific capabilities are not available.",
+            Name = name,
+            Platform = "Windows host",
+            Version = "Not an OpenCL device",
+            Vendor = string.IsNullOrWhiteSpace(vendor) ? "Unavailable" : vendor,
+            Type = "CPU",
+            ComputeUnitsLabel = "Logical processors",
+            ComputeUnits = Environment.ProcessorCount.ToString(),
+            Clock = clockMhz,
+            AddressSpace = Environment.Is64BitOperatingSystem ? "64 bit" : "32 bit",
+            MaxWorkGroupSize = "N/A",
+            WorkItemSizes = "N/A",
+            SinglePrecisionFma = "N/A",
+            DoublePrecisionSupport = "N/A",
+            GlobalMemory = totalMemory is ulong bytes ? FormatBytes(bytes, 1_000_000d, "MB") : "Unavailable",
+            LocalMemory = "N/A",
+            LocalMemoryType = "N/A",
+            UnifiedMemoryWithHost = "yes",
+            Endianness = BitConverter.IsLittleEndian ? "little endian" : "big endian",
+            EccSupport = "Unavailable",
+            NativeCharWidth = "N/A",
+            NativeShortWidth = "N/A",
+            NativeIntWidth = "N/A",
+            NativeLongWidth = "N/A",
+            NativeFloatWidth = "N/A",
+            NativeDoubleWidth = "N/A",
+            NativeHalfWidth = "N/A",
+            PreferredCharWidth = "N/A",
+            PreferredShortWidth = "N/A",
+            PreferredIntWidth = "N/A",
+            PreferredLongWidth = "N/A",
+            PreferredFloatWidth = "N/A",
+            PreferredDoubleWidth = "N/A",
+            PreferredHalfWidth = "N/A"
+        };
+    }
+
+    private static ulong? TryGetSystemPhysicalMemoryBytes()
+    {
+        var memoryStatus = new MemoryStatusEx
+        {
+            Length = (uint)Marshal.SizeOf<MemoryStatusEx>()
+        };
+
+        return GlobalMemoryStatusEx(ref memoryStatus) ? memoryStatus.TotalPhysicalMemory : null;
+    }
+
     private static string FormatSupport(ulong? configuration, ulong flag)
     {
         if (!configuration.HasValue) return "Unavailable";
@@ -305,6 +386,24 @@ public sealed class OpenClDeviceService
     {
         public int ErrorCode { get; } = errorCode;
     }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MemoryStatusEx
+    {
+        public uint Length;
+        public uint MemoryLoad;
+        public ulong TotalPhysicalMemory;
+        public ulong AvailablePhysicalMemory;
+        public ulong TotalPageFile;
+        public ulong AvailablePageFile;
+        public ulong TotalVirtual;
+        public ulong AvailableVirtual;
+        public ulong AvailableExtendedVirtual;
+    }
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GlobalMemoryStatusEx(ref MemoryStatusEx buffer);
 
     [DllImport("OpenCL.dll", CallingConvention = CallingConvention.Winapi)]
     private static extern int clGetPlatformIDs(uint numEntries, [Out] IntPtr[]? platforms, out uint numPlatforms);
