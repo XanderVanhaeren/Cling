@@ -1,0 +1,26 @@
+<UserControl x:Class="Cling.Views.AboutView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cling="clr-namespace:Cling.Controls">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Column="1" Grid.Row="1" HorizontalAlignment="Center">
+
+            <!-- Speedometer gauge -->
+            <cling:Gauge Width="280" Height="280" Diameter="280" Value="0.65" ShowLabel="True" LabelText="CL!ng" Loaded="Gauge_Loaded"/>
+            <TextBlock Text="Version 1.17 (build 956)" Foreground="#2b2b2b" FontSize="14" FontWeight="SemiBold" Margin="0,18,0,6" HorizontalAlignment="Center"/>
+            <TextBlock Text="Copyright © 2025 Bart Vanhaeren." Foreground="#555555" FontSize="13" Margin="0,0,0,18" HorizontalAlignment="Center"/>
+
+            <Button Content="Rate on App Store" Style="{StaticResource ClingButton}" Width="160" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+
+            <TextBlock Text="OpenCL and the OpenCL logo are trademarks of Apple Inc." Foreground="#8a8a8a" FontSize="11" HorizontalAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</UserControl>
