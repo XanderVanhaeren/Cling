@@ -8,36 +8,54 @@
         mc:Ignorable="d"
         Style="{StaticResource ClingWindow}"
         Title="CL!ng" Height="600" Width="600" ResizeMode="NoResize" Loaded="MainWindow_Loaded">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="30"
+                      GlassFrameThickness="1"/>
+    </WindowChrome.WindowChrome>
     <Grid Margin="0,0,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="120"/>
         </Grid.RowDefinitions>
 
         <!-- Tabs -->
-        <TabControl Grid.Row="0" Style="{StaticResource ClingTabControl}"  >
-            <TabItem Header="Device" Style="{StaticResource ClingTabItemHeader}">
+        <TabControl Grid.Row="0" Style="{StaticResource ClingTabControl}" Grid.ColumnSpan="2">
+            <TabItem Header="Device" Style="{StaticResource ClingTabItemHeader}" WindowChrome.IsHitTestVisibleInChrome="True">
                 <v:DeviceView x:Name="DeviceInfoView"/>
             </TabItem>
-            <TabItem Header="Memory" Style="{StaticResource ClingTabItemHeader}">
+            <TabItem Header="Memory" Style="{StaticResource ClingTabItemHeader}" WindowChrome.IsHitTestVisibleInChrome="True">
                 <v:MemoryView x:Name="MemoryInfoView"/>
             </TabItem>
-            <TabItem Header="Performance" Style="{StaticResource ClingTabItemHeader}">
+            <TabItem Header="Performance" Style="{StaticResource ClingTabItemHeader}" WindowChrome.IsHitTestVisibleInChrome="True">
                 <v:PerformanceView/>
             </TabItem>
-            <TabItem Header="About" Style="{StaticResource ClingTabItemHeader}">
+            <TabItem Header="About" Style="{StaticResource ClingTabItemHeader}" WindowChrome.IsHitTestVisibleInChrome="True">
                 <v:AboutView Loaded="AboutView_Loaded"/>
             </TabItem>
         </TabControl>
 
-        <Border Grid.Row="1" Background="#252525" BorderBrush="#3a3a3a" BorderThickness="1,1,1,0" Padding="12,6">
+        <Border Background="#252525" BorderBrush="#3a3a3a" BorderThickness="1,1,1,1" Padding="10,10" Grid.ColumnSpan="2" Margin="0,464,0,0" Grid.RowSpan="2">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="106"/>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="128"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="OpenCL Device" Style="{StaticResource ClingLabel}" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                <ComboBox x:Name="DeviceSelector" Grid.Column="1" Style="{StaticResource ClingComboBox}" DisplayMemberPath="DisplayName" SelectionChanged="DeviceSelector_SelectionChanged"/>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="32"/>
+                </Grid.RowDefinitions>
+                <Image Source="/Assets/Cling_Logo.png" Grid.RowSpan="3" Width="96" Height="96" HorizontalAlignment="Left"  RenderOptions.BitmapScalingMode="HighQuality"/>
+
+                <TextBlock Text="OpenCL Device" Grid.Row="0" Grid.Column="1" Style="{StaticResource ClingLabel}" VerticalAlignment="Center" />
+                <ComboBox x:Name="DeviceSelector" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" Style="{StaticResource ClingComboBox}" DisplayMemberPath="DisplayName" SelectionChanged="DeviceSelector_SelectionChanged"/>
+
+
+                <Button Content="Benchmark" Grid.Row="2" Grid.Column="1" Style="{StaticResource ClingButton}" Width="100" Height="32" HorizontalAlignment="Center" Background="#FF2A2A2A"/>
+                <CheckBox Content="Share" Grid.Row="2" Grid.Column="2" IsChecked="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Style="{StaticResource ClingCheckBox}"/>
+                <Button Content="Close" Grid.Row="2" Grid.Column="3" Style="{StaticResource ClingButton}" Width="100" Height="32" HorizontalAlignment="Right" Background="#FF2A2A2A" Click="CloseButton_Click"/>
             </Grid>
         </Border>
     </Grid>

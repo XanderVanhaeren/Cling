@@ -13,10 +13,14 @@
 
   <ItemGroup>
     <Folder Include="Controls\" />
-    <Content Include="Assets\VERT_Cling_Logo.ico" />
+	<Resource Include="Assets\VERT_Cling_Logo.ico" />
+    <Resource Include="Assets\Cling_Logo.png" />
     <Content Include="OpenCL.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Update="Assets\Cling_Logo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

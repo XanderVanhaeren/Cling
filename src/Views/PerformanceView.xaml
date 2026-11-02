@@ -2,11 +2,11 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Style="{StaticResource ClingScrollViewer}">
-        <StackPanel Margin="14,8">
+        <StackPanel Margin="10,10">
 
             <!-- Memory Bandwidth -->
             <TextBlock Text="Memory Bandwidth" Style="{StaticResource ClingHeader}"/>
-            <Grid Margin="0,6" Background="#1f1f1f">
+            <Grid Margin="0,6">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -68,7 +68,7 @@
             <TextBlock Text="Compute Performance" Style="{StaticResource ClingHeader}" Margin="0,14,0,6" Height="21" Width="596"/>
             <CheckBox Content="Interrupt Memory Bandwidth testing when running performance test" IsChecked="True" Margin="0,0,0,8" Style="{StaticResource ClingCheckBox}"/>
 
-            <Grid Background="#1f1f1f">
+            <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>

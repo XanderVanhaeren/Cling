@@ -1,14 +1,20 @@
 <UserControl x:Class="Cling.Views.AboutView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <Grid Background="#1a1a1a">
+
+   <Grid>
+       
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
 
-            <TextBlock Text="Version 0.02 (build idk)" Foreground="#ffffff" FontSize="14" FontWeight="SemiBold" Margin="0,18,0,6" HorizontalAlignment="Center"/>
-            <TextBlock Text="(not) Copyright © 2026 Xander Vanhaeren." Foreground="#808080" FontSize="13" Margin="0,0,0,18" HorizontalAlignment="Center"/>
+                <!-- App Logo -->
+                <Image Source="/Assets/Cling_Logo.png" Width="160" Height="160" Margin="0,20,0,20" HorizontalAlignment="Center" Stretch="Uniform" RenderOptions.BitmapScalingMode="HighQuality"/>
 
-            <Button Content="Review App" Style="{StaticResource ClingButton}" Width="160" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+                <TextBlock Text="Version 0.03" Foreground="#ffffff" FontSize="14" FontWeight="SemiBold" Margin="0,6,0,6" HorizontalAlignment="Center"/>
+                <TextBlock Text="(not) Copyright © 2026 Xander Vanhaeren." Foreground="#808080" FontSize="13" Margin="0,0,0,20" HorizontalAlignment="Center"/>
+
+                <Button Content="Review App" Style="{StaticResource ClingButton}" Width="160" Height="30" HorizontalAlignment="Center" Margin="0,0,0,20" Background="#FF2A2A2A"/>
 
         </StackPanel>
-    </Grid>
+   </Grid>
+
 </UserControl>
