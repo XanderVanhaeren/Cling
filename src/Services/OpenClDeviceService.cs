@@ -1,3 +1,4 @@
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Cling.Models;
@@ -53,6 +54,8 @@ public sealed class OpenClDeviceService
 
     public IReadOnlyList<OpenClDeviceInfo> GetAvailableDevices()
     {
+        EnsureOpenCLLoaded();
+
         try
         {
             var devices = EnumerateDevices()
@@ -382,6 +385,36 @@ public sealed class OpenClDeviceService
         }
     }
 
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    private struct SYSTEMTIME
+    {
+        public ushort wYear;
+        public ushort wMonth;
+        public ushort wDayOfWeek;
+        public ushort wDay;
+        public ushort wHour;
+        public ushort wMinute;
+        public ushort wSecond;
+        public ushort wMilliseconds;
+    }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    private struct WIN32_FIND_DATAW
+    {
+        public uint dwFileAttributes;
+        public SYSTEMTIME ftCreationTime;
+        public SYSTEMTIME ftLastAccessTime;
+        public SYSTEMTIME ftLastWriteTime;
+        public uint nFileSizeHigh;
+        public uint nFileSizeLow;
+        public uint dwReserved0;
+        public uint dwReserved1;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+        public string cFileName;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 14)]
+        public string cAlternateExtension;
+    }
+
     private sealed class OpenClException(int errorCode) : Exception
     {
         public int ErrorCode { get; } = errorCode;
@@ -404,6 +437,124 @@ public sealed class OpenClDeviceService
     [DllImport("kernel32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool GlobalMemoryStatusEx(ref MemoryStatusEx buffer);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern IntPtr LoadLibrary(string lpFileName);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool FreeLibrary(IntPtr hModule);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern IntPtr FindFirstFile(string lpFileName, ref WIN32_FIND_DATAW findData);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool FindClose(IntPtr hFindFile);
+
+    private static IntPtr _openclModule = IntPtr.Zero;
+
+    private static bool TryLoadOpenCLDll()
+    {
+        if (_openclModule != IntPtr.Zero)
+            return true;
+
+        // Try to load from application directory first (output directory when running dotnet run)
+        var appPath = AppDomain.CurrentDomain.BaseDirectory;
+        var openClPath = Path.Combine(appPath, "OpenCL.dll");
+        
+        if (File.Exists(openClPath))
+        {
+            _openclModule = LoadLibrary(openClPath);
+            return _openclModule != IntPtr.Zero;
+        }
+
+        // Try project directory (when running from source)
+        var assemblyLocation = typeof(OpenClDeviceService).Assembly.Location;
+        var projectOpenClPath = Path.Combine(Path.GetDirectoryName(assemblyLocation), "OpenCL.dll");
+        if (File.Exists(projectOpenClPath))
+        {
+            _openclModule = LoadLibrary(projectOpenClPath);
+            return _openclModule != IntPtr.Zero;
+        }
+
+        // Try system32 as fallback
+        var systemOpenClPath = Path.Combine(Environment.SystemDirectory, "OpenCL.dll");
+        if (File.Exists(systemOpenClPath))
+        {
+            try
+            {
+                _openclModule = LoadLibrary(systemOpenClPath);
+                return _openclModule != IntPtr.Zero;
+            }
+            catch (DllNotFoundException ex)
+            {
+                // Architecture mismatch - 32-bit app trying to load 64-bit DLL
+                // This can happen if the OpenCL runtime is 64-bit but we're running a 32-bit app
+                return false;
+            }
+        }
+
+        // Try Program Files as fallback (for 64-bit systems)
+        var programFilesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "Common Files\\Intel\\OpenCL\\SDKs", "1.2", "Redist", "bin", "x64", "OpenCL.dll");
+        if (File.Exists(programFilesPath))
+        {
+            try
+            {
+                _openclModule = LoadLibrary(programFilesPath);
+                return _openclModule != IntPtr.Zero;
+            }
+            catch (DllNotFoundException)
+            {
+                // Architecture mismatch
+            }
+        }
+
+        // Try AMD OpenCL SDK location
+        var amdPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "AMD", "APPSDK", "1.0", "bin", "x64", "OpenCL.dll");
+        if (File.Exists(amdPath))
+        {
+            try
+            {
+                _openclModule = LoadLibrary(amdPath);
+                return _openclModule != IntPtr.Zero;
+            }
+            catch (DllNotFoundException)
+            {
+                // Architecture mismatch
+            }
+        }
+
+        // Try NVIDIA CUDA path
+        var nvidiaPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), "NVIDIA Corporation", "CUDA", "v12.0", "bin", "x64", "OpenCL.dll");
+        if (File.Exists(nvidiaPath))
+        {
+            try
+            {
+                _openclModule = LoadLibrary(nvidiaPath);
+                return _openclModule != IntPtr.Zero;
+            }
+            catch (DllNotFoundException)
+            {
+                // Architecture mismatch
+            }
+        }
+
+        return false;
+    }
+
+    private static void EnsureOpenCLLoaded()
+    {
+        if (!TryLoadOpenCLDll())
+        {
+            throw new DllNotFoundException("OpenCL.dll not found. Please install OpenCL runtime (AMD, Intel, or NVIDIA).\n" +
+                "Checked locations:\n" +
+                $"  - Application directory: {AppDomain.CurrentDomain.BaseDirectory}\n" +
+                $"  - System32: {Environment.SystemDirectory}");
+        }
+    }
 
     [DllImport("OpenCL.dll", CallingConvention = CallingConvention.Winapi)]
     private static extern int clGetPlatformIDs(uint numEntries, [Out] IntPtr[]? platforms, out uint numPlatforms);

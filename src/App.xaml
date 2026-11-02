@@ -4,9 +4,9 @@
              xmlns:local="clr-namespace:Cling"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <!-- Shared CL!ng styling -->
+        <!-- Shared CL!ng styling - Dark Mode -->
         <Style x:Key="ClingWindow" TargetType="{x:Type Window}">
-            <Setter Property="Background" Value="#f2f2f2"/>
+            <Setter Property="Background" Value="#1a1a1a"/>
             <Setter Property="FontFamily" Value="Segoe UI, Calibri, sans-serif"/>
             <Setter Property="FontSize" Value="13"/>
         </Style>
@@ -16,49 +16,182 @@
             <Setter Property="IsReadOnly" Value="True"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontFamily" Value="Segoe UI, Calibri, sans-serif"/>
-            <Setter Property="Foreground" Value="#2b2b2b"/>
-            <Setter Property="Background" Value="#ffffff"/>
-            <Setter Property="BorderBrush" Value="#c0c0c0"/>
+            <Setter Property="Foreground" Value="#e0e0e0"/>
+            <Setter Property="Background" Value="#2a2a2a"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="4,2"/>
-            <Setter Property="CaretBrush" Value="#333333"/>
-            <Setter Property="SelectionBrush" Value="#b0d8ff"/>
+            <Setter Property="CaretBrush" Value="#e0e0e0"/>
+            <Setter Property="SelectionBrush" Value="#3a95d8"/>
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
         </Style>
 
         <Style x:Key="ClingComboBox" TargetType="{x:Type ComboBox}">
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="FontFamily" Value="Segoe UI, Calibri, sans-serif"/>
-            <Setter Property="Foreground" Value="#2b2b2b"/>
-            <Setter Property="Background" Value="#ffffff"/>
-            <Setter Property="BorderBrush" Value="#c0c0c0"/>
+            <Setter Property="Foreground" Value="#e0e0e0"/>
+            <Setter Property="Background" Value="#2a2a2a"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="4,2"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid ClipToBounds="False">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="24"/>
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="comboBorder" Grid.ColumnSpan="2" Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2"/>
+                            <ContentPresenter x:Name="contentPresenter" Grid.Column="0" Margin="{TemplateBinding Padding}"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              VerticalAlignment="Center"/>
+                            <ToggleButton Grid.Column="0" Grid.ColumnSpan="2" Focusable="False" IsTabStop="False"
+                                          Background="Transparent" BorderThickness="0" ClickMode="Press"
+                                          HorizontalContentAlignment="Right" Padding="0,0,8,0"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                                        <Border Background="Transparent">
+                                            <ContentPresenter Content="{TemplateBinding Content}"
+                                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                                              Margin="{TemplateBinding Padding}"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                                <Path Data="M 0 0 L 4 4 L 8 0 Z" Fill="{TemplateBinding Foreground}"
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </ToggleButton>
+                            <Popup x:Name="PART_Popup" AllowsTransparency="True"
+                                   IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                   PlacementTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}" Placement="Bottom"
+                                   PopupAnimation="Slide" MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                   MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}">
+                                <Border x:Name="dropDownBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2" Padding="4,2">
+                                    <ScrollViewer x:Name="DropDownScrollViewer" Margin="-1" CanContentScroll="True">
+                                        <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="comboBorder" Property="BorderBrush" Value="#4a95d8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="{x:Type ScrollBar}">
+            <Setter Property="Width" Value="12"/>
+            <Setter Property="MinWidth" Value="12"/>
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ScrollBar}">
+                        <Grid Background="{TemplateBinding Background}">
+                            <Track x:Name="PART_Track" Orientation="{TemplateBinding Orientation}" IsDirectionReversed="True">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton x:Name="DecreasePage" Command="{x:Static ScrollBar.PageUpCommand}" Focusable="False" IsTabStop="False" Background="Transparent" BorderThickness="0">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                <Border Background="Transparent"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb>
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="{x:Type Thumb}">
+                                                <Border x:Name="ThumbSurface" Background="#555555" CornerRadius="4" Margin="2"/>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ThumbSurface" Property="Background" Value="#777777"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsDragging" Value="True">
+                                                        <Setter TargetName="ThumbSurface" Property="Background" Value="#3a95d8"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton x:Name="IncreasePage" Command="{x:Static ScrollBar.PageDownCommand}" Focusable="False" IsTabStop="False" Background="Transparent" BorderThickness="0">
+                                        <RepeatButton.Template>
+                                            <ControlTemplate TargetType="{x:Type RepeatButton}">
+                                                <Border Background="Transparent"/>
+                                            </ControlTemplate>
+                                        </RepeatButton.Template>
+                                    </RepeatButton>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Orientation" Value="Horizontal">
+                                <Setter Property="Width" Value="Auto"/>
+                                <Setter Property="MinWidth" Value="0"/>
+                                <Setter Property="Height" Value="12"/>
+                                <Setter Property="MinHeight" Value="12"/>
+                                <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False"/>
+                                <Setter TargetName="DecreasePage" Property="Command" Value="{x:Static ScrollBar.PageLeftCommand}"/>
+                                <Setter TargetName="IncreasePage" Property="Command" Value="{x:Static ScrollBar.PageRightCommand}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Bold section header label -->
         <Style x:Key="ClingHeader" TargetType="{x:Type TextBlock}">
             <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#1a1a1a"/>
+            <Setter Property="Foreground" Value="#dddddd"/>
             <Setter Property="FontSize" Value="13"/>
         </Style>
 
         <!-- Section label next to a value field -->
         <Style x:Key="ClingLabel" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="#404040"/>
+            <Setter Property="Foreground" Value="#a0a0a0"/>
             <Setter Property="FontSize" Value="13"/>
         </Style>
 
         <!-- Plain body text -->
         <Style x:Key="ClingText" TargetType="{x:Type TextBlock}">
-            <Setter Property="Foreground" Value="#2b2b2b"/>
+            <Setter Property="Foreground" Value="#d0d0d0"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+        <Style x:Key="ClingStatusMessage" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource ClingText}">
+            <Setter Property="Foreground" Value="#ff8080"/>
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="Margin" Value="0,2,0,0"/>
+            <Style.Triggers>
+                <Trigger Property="Text" Value="{x:Null}">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+                <Trigger Property="Text" Value="">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="ClingCheckBox" TargetType="{x:Type CheckBox}">
+            <Setter Property="Foreground" Value="#d0d0d0"/>
             <Setter Property="FontSize" Value="13"/>
         </Style>
 
         <!-- Subtle divider line -->
         <Style x:Key="ClingBorder" TargetType="{x:Type Border}">
-            <Setter Property="Background" Value="#e8e8e8"/>
-            <Setter Property="BorderBrush" Value="#dcdcdc"/>
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="CornerRadius" Value="6"/>
         </Style>
@@ -66,25 +199,67 @@
         <!-- Button styling -->
         <Style x:Key="ClingButton" TargetType="{x:Type Button}">
             <Setter Property="FontSize" Value="13"/>
-            <Setter Property="Foreground" Value="#2b2b2b"/>
-            <Setter Property="Background" Value="#ffffff"/>
-            <Setter Property="BorderBrush" Value="#c0c0c0"/>
+            <Setter Property="Foreground" Value="#ffffff"/>
+            <Setter Property="Background" Value="#2a2a2a"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="8,4"/>
         </Style>
 
         <!-- Tab control matching the CL!ng tab bar -->
         <Style x:Key="ClingTabControl" TargetType="{x:Type TabControl}">
-            <Setter Property="Background" Value="#f2f2f2"/>
+            <Setter Property="Background" Value="#1a1a1a"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Padding" Value="2,4"/>
         </Style>
 
         <!-- Tab item header matching the CL!ng rounded tabs -->
         <Style x:Key="ClingTabItemHeader" TargetType="{x:Type TabItem}">
-            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="Foreground" Value="#a0a0a0"/>
             <Setter Property="FontSize" Value="13"/>
             <Setter Property="Padding" Value="16,6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border x:Name="border" Background="#1a1a1a" CornerRadius="4,4,0,0" Margin="2,0" Padding="8,4" Cursor="Hand">
+                            <ContentPresenter x:Name="contentPresenter" ContentSource="Header" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Selector.IsSelected" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#3a95d8"/>
+                                <Setter Property="Foreground" Value="#ffffff"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#4a95d8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Dark scrollbar -->
+        <Style x:Key="ClingScrollbar" TargetType="{x:Type ScrollBar}">
+            <Setter Property="Background" Value="#2a2a2a"/>
+            <Setter Property="Foreground" Value="#404040"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Dark thumb -->
+        <Style x:Key="ClingThumb" TargetType="{x:Type Thumb}">
+            <Setter Property="Background" Value="#404040"/>
+            <Setter Property="Foreground" Value="#505050"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="1"/>
+        </Style>
+
+        <!-- Dark scrollViewer -->
+        <Style x:Key="ClingScrollViewer" TargetType="{x:Type ScrollViewer}">
+            <Setter Property="Background" Value="#1a1a1a"/>
+            <Setter Property="Foreground" Value="#e0e0e0"/>
+            <Setter Property="BorderBrush" Value="#3a3a3a"/>
+            <Setter Property="BorderThickness" Value="1"/>
         </Style>
     </Application.Resources>
 </Application>

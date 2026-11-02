@@ -1,89 +1,91 @@
 <UserControl x:Class="Cling.Views.PerformanceView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Height="420">
-    <StackPanel Margin="14,8">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Style="{StaticResource ClingScrollViewer}">
+        <StackPanel Margin="14,8">
 
-        <!-- Memory Bandwidth -->
-        <TextBlock Text="Memory Bandwidth" Style="{StaticResource ClingHeader}"/>
-        <Grid Margin="0,6">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240"/>
-                <ColumnDefinition Width="180"/>
-                <ColumnDefinition Width="180"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0" Text="Host to Device" Style="{StaticResource ClingLabel}" Margin="0,0,0,6"/>
-            <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="5285.85 MiB/s" Margin="0,0,0,6"/>
-            <TextBox Grid.Row="0" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text="5374.99 MiB/s" Margin="0,0,0,6"/>
+            <!-- Memory Bandwidth -->
+            <TextBlock Text="Memory Bandwidth" Style="{StaticResource ClingHeader}"/>
+            <Grid Margin="0,6" Background="#1f1f1f">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="240"/>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="180"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Text="Host to Device" Style="{StaticResource ClingLabel}" Margin="0,0,0,6"/>
+                <TextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="5285.85 MiB/s" Margin="0,0,0,6"/>
+                <TextBox Grid.Row="0" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text="5374.99 MiB/s" Margin="0,0,0,6"/>
 
-            <TextBlock Grid.Row="1" Text="Device to Host" Style="{StaticResource ClingLabel}" Margin="0,0,0,6"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="6161.30 MiB/s" Margin="0,0,0,6"/>
-            <TextBox Grid.Row="1" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text="6311.14 MiB/s" Margin="0,0,0,6"/>
+                <TextBlock Grid.Row="1" Text="Device to Host" Style="{StaticResource ClingLabel}" Margin="0,0,0,6"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="6161.30 MiB/s" Margin="0,0,0,6"/>
+                <TextBox Grid.Row="1" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text="6311.14 MiB/s" Margin="0,0,0,6"/>
 
-            <TextBlock Grid.Row="2" Text="Device to Device" Style="{StaticResource ClingLabel}"/>
-            <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="10772.80 MiB/s"/>
-            <TextBox Grid.Row="2" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text=""/>
-        </Grid>
+                <TextBlock Grid.Row="2" Text="Device to Device" Style="{StaticResource ClingLabel}"/>
+                <TextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="10772.80 MiB/s"/>
+                <TextBox Grid.Row="2" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text="12323.80 MiB/s"/>
+            </Grid>
 
-        <TextBlock Text="Speed over time (MiB/s)" Style="{StaticResource ClingLabel}" Margin="0,2,0,4"/>
-        <Border Width="600" Height="112" HorizontalAlignment="Left" Background="White" BorderBrush="#c0c0c0" BorderThickness="1">
-            <Canvas Width="598" Height="110" ClipToBounds="True">
-                <Line X1="0" Y1="22" X2="598" Y2="22" Stroke="#e5e5e5"/>
-                <Line X1="0" Y1="44" X2="598" Y2="44" Stroke="#e5e5e5"/>
-                <Line X1="0" Y1="66" X2="598" Y2="66" Stroke="#e5e5e5"/>
-                <Line X1="0" Y1="88" X2="598" Y2="88" Stroke="#e5e5e5"/>
-                <Polyline Points="0,72 75,65 150,70 225,52 300,58 375,45 450,49 525,34 598,39" Stroke="#2878b5" StrokeThickness="2"/>
-                <Polyline Points="0,51 75,56 150,43 225,49 300,37 375,44 450,30 525,35 598,24" Stroke="#e28a2b" StrokeThickness="2"/>
-                <Polyline Points="0,28 75,33 150,21 225,26 300,16 375,22 450,12 525,17 598,8" Stroke="#43945b" StrokeThickness="2"/>
-            </Canvas>
-        </Border>
-        <Grid Width="600" HorizontalAlignment="Left" Margin="0,4,0,0">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,14,0">
-                <Rectangle Width="14" Height="2" Fill="#2878b5" VerticalAlignment="Center"/>
-                <TextBlock Text="Host to Device" Style="{StaticResource ClingLabel}" Margin="4,0,0,0"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,14,0">
-                <Rectangle Width="14" Height="2" Fill="#e28a2b" VerticalAlignment="Center"/>
-                <TextBlock Text="Device to Host" Style="{StaticResource ClingLabel}" Margin="4,0,0,0"/>
-            </StackPanel>
-            <StackPanel Grid.Column="2" Orientation="Horizontal">
-                <Rectangle Width="14" Height="2" Fill="#43945b" VerticalAlignment="Center"/>
-                <TextBlock Text="Device to Device" Style="{StaticResource ClingLabel}" Margin="4,0,0,0"/>
-            </StackPanel>
-            <TextBlock Grid.Column="3" Text="Time →" Style="{StaticResource ClingLabel}" HorizontalAlignment="Right"/>
-        </Grid>
+            <TextBlock Text="Speed over time (MiB/s)" Style="{StaticResource ClingLabel}" Margin="0,2,0,4"/>
+            <Border Width="600" Height="112" HorizontalAlignment="Left" Background="#1a1a1a" BorderBrush="#3a3a3a" BorderThickness="1">
+                <Canvas Width="598" Height="110" ClipToBounds="True">
+                    <Line X1="0" Y1="22" X2="598" Y2="22" Stroke="#404040"/>
+                    <Line X1="0" Y1="44" X2="598" Y2="44" Stroke="#404040"/>
+                    <Line X1="0" Y1="66" X2="598" Y2="66" Stroke="#404040"/>
+                    <Line X1="0" Y1="88" X2="598" Y2="88" Stroke="#404040"/>
+                    <Polyline Points="0,72 75,65 150,70 225,52 300,58 375,45 450,49 525,34 598,39" Stroke="#3a95d8" StrokeThickness="2"/>
+                    <Polyline Points="0,51 75,56 150,43 225,49 300,37 375,44 450,30 525,35 598,24" Stroke="#d87a3a" StrokeThickness="2"/>
+                    <Polyline Points="0,28 75,33 150,21 225,26 300,16 375,22 450,12 525,17 598,8" Stroke="#3ad87a" StrokeThickness="2"/>
+                </Canvas>
+            </Border>
+            <Grid Width="600" HorizontalAlignment="Left" Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Margin="0,0,14,0">
+                    <Rectangle Width="14" Height="2" Fill="#3a95d8" VerticalAlignment="Center"/>
+                    <TextBlock Text="Host to Device" Style="{StaticResource ClingLabel}" Margin="4,0,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,14,0">
+                    <Rectangle Width="14" Height="2" Fill="#d87a3a" VerticalAlignment="Center"/>
+                    <TextBlock Text="Device to Host" Style="{StaticResource ClingLabel}" Margin="4,0,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Rectangle Width="14" Height="2" Fill="#3ad87a" VerticalAlignment="Center"/>
+                    <TextBlock Text="Device to Device" Style="{StaticResource ClingLabel}" Margin="4,0,0,0"/>
+                </StackPanel>
+                <TextBlock Grid.Column="3" Text="Time" Style="{StaticResource ClingLabel}" HorizontalAlignment="Right"/>
+            </Grid>
 
-        <!-- Compute Performance -->
-        <TextBlock Text="Compute Performance" Style="{StaticResource ClingHeader}" Margin="0,14,0,6" Height="21" Width="596"/>
-        <CheckBox Content="Interrupt Memory Bandwidth testing when running performance test" IsChecked="True" Margin="0,0,0,8"/>
+            <!-- Compute Performance -->
+            <TextBlock Text="Compute Performance" Style="{StaticResource ClingHeader}" Margin="0,14,0,6" Height="21" Width="596"/>
+            <CheckBox Content="Interrupt Memory Bandwidth testing when running performance test" IsChecked="True" Margin="0,0,0,8" Style="{StaticResource ClingCheckBox}"/>
 
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240"/>
-                <ColumnDefinition Width="180"/>
-                <ColumnDefinition Width="180"/>
-            </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0" Text="Scalar" Style="{StaticResource ClingLabel}"/>
-            <TextBox  Grid.Row="0" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="0.00 GFLOPS"/>
-            <TextBox  Grid.Row="0" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text="0.00 GFLOPS"/>
+            <Grid Background="#1f1f1f">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="240"/>
+                    <ColumnDefinition Width="180"/>
+                    <ColumnDefinition Width="180"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Text="Scalar" Style="{StaticResource ClingLabel}"/>
+                <TextBox  Grid.Row="0" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="0.00 GFLOPS"/>
+                <TextBox  Grid.Row="0" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text="0.00 GFLOPS"/>
 
-            <TextBlock Grid.Row="1" Text="Vector" Style="{StaticResource ClingLabel}" Margin="0,6,0,0"/>
-            <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="0.00 GFLOPS" Margin="0,6,0,0"/>
-            <TextBox Grid.Row="1" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text="0.00 GFLOPS" Margin="0,6,0,0"/>
-        </Grid>
-    </StackPanel>
+                <TextBlock Grid.Row="1" Text="Vector" Style="{StaticResource ClingLabel}" Margin="0,6,0,0"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ClingTextBox}" Text="0.00 GFLOPS" Margin="0,6,0,0"/>
+                <TextBox Grid.Row="1" Grid.Column="2" Style="{StaticResource ClingTextBox}" Text="0.00 GFLOPS" Margin="0,6,0,0"/>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>
